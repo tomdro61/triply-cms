@@ -54,7 +54,7 @@ export const Posts: CollectionConfig = {
       name: 'featuredImage',
       type: 'upload',
       relationTo: 'media',
-      required: true,
+      required: false,
     },
     {
       name: 'content',
@@ -131,6 +131,65 @@ export const Posts: CollectionConfig = {
           admin: {
             description: 'Description for search engines (max 160 chars)',
           },
+        },
+      ],
+    },
+    // Blog engine fields
+    {
+      name: 'airportCode',
+      type: 'text',
+      index: true,
+      admin: {
+        position: 'sidebar',
+        description: 'Airport IATA code (e.g., JFK, LGA)',
+      },
+    },
+    {
+      name: 'articleType',
+      type: 'select',
+      index: true,
+      options: [
+        { label: 'Hub', value: 'hub' },
+        { label: 'Sub-Pillar', value: 'sub-pillar' },
+        { label: 'Spoke', value: 'spoke' },
+      ],
+      admin: {
+        position: 'sidebar',
+        description: 'Topic cluster tier for SEO content',
+      },
+    },
+    {
+      name: 'parentSlug',
+      type: 'text',
+      admin: {
+        position: 'sidebar',
+        description: 'Parent article slug (for sub-pillars and spokes)',
+      },
+    },
+    {
+      name: 'hubSlug',
+      type: 'text',
+      admin: {
+        position: 'sidebar',
+        description: 'Hub article slug for the airport cluster',
+      },
+    },
+    {
+      name: 'faqItems',
+      type: 'array',
+      admin: {
+        description: 'FAQ items for accordion display and schema markup',
+      },
+      fields: [
+        {
+          name: 'question',
+          type: 'text',
+          required: true,
+        },
+        {
+          name: 'answer',
+          type: 'textarea',
+          required: true,
         },
       ],
     },

@@ -11,6 +11,7 @@ import { Media } from './collections/Media'
 import { Posts } from './collections/Posts'
 import { Categories } from './collections/Categories'
 import { Tags } from './collections/Tags'
+import { ContentQueue } from './collections/ContentQueue'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -42,7 +43,7 @@ export default buildConfig({
     'http://localhost:3001',
   ],
 
-  collections: [Users, Media, Posts, Categories, Tags],
+  collections: [Users, Media, Posts, Categories, Tags, ContentQueue],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {
@@ -53,7 +54,7 @@ export default buildConfig({
       connectionString: process.env.DATABASE_URI || '',
     },
     schemaName: 'payload',
-    push: false,
+    push: true,
   }),
   sharp,
   plugins: [

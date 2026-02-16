@@ -1,0 +1,222 @@
+import { CollectionConfig } from 'payload'
+
+export const ContentQueue: CollectionConfig = {
+  slug: 'content-queue',
+  admin: {
+    useAsTitle: 'suggestedTitle',
+    defaultColumns: ['suggestedTitle', 'airportCode', 'articleType', 'priority', 'status'],
+    group: 'Blog Engine',
+  },
+  access: {
+    read: ({ req: { user } }) => !!user,
+    create: ({ req: { user } }) => !!user,
+    update: ({ req: { user } }) => !!user,
+    delete: ({ req: { user } }) => !!user,
+  },
+  fields: [
+    {
+      name: 'keyword',
+      type: 'text',
+      required: true,
+      admin: {
+        description: 'Target SEO keyword (e.g., "jfk airport parking rates")',
+      },
+    },
+    {
+      name: 'suggestedTitle',
+      type: 'text',
+      required: true,
+      admin: {
+        description: 'Suggested article title',
+      },
+    },
+    {
+      name: 'airportCode',
+      type: 'text',
+      required: true,
+      index: true,
+      admin: {
+        description: 'Airport IATA code (e.g., JFK, LGA)',
+      },
+    },
+    {
+      name: 'slug',
+      type: 'text',
+      required: true,
+      unique: true,
+      admin: {
+        description: 'URL slug for the generated article',
+      },
+    },
+    {
+      name: 'articleType',
+      type: 'select',
+      required: true,
+      index: true,
+      options: [
+        { label: 'Hub', value: 'hub' },
+        { label: 'Sub-Pillar', value: 'sub-pillar' },
+        { label: 'Spoke', value: 'spoke' },
+      ],
+      admin: {
+        description: 'Topic cluster tier',
+      },
+    },
+    {
+      name: 'parentSlug',
+      type: 'text',
+      admin: {
+        description: 'Parent article slug (for sub-pillars and spokes)',
+      },
+    },
+    {
+      name: 'hubSlug',
+      type: 'text',
+      admin: {
+        description: 'Hub article slug for the airport cluster',
+      },
+    },
+    // SEO metrics
+    {
+      name: 'searchVolume',
+      type: 'number',
+      admin: {
+        description: 'Monthly search volume estimate',
+      },
+    },
+    {
+      name: 'seoDifficulty',
+      type: 'number',
+      min: 0,
+      max: 100,
+      admin: {
+        description: 'SEO difficulty score (0-100)',
+      },
+    },
+    {
+      name: 'targetWords',
+      type: 'number',
+      defaultValue: 1500,
+      admin: {
+        description: 'Target word count for the article',
+      },
+    },
+    // Priority and status
+    {
+      name: 'priority',
+      type: 'select',
+      required: true,
+      defaultValue: 'S2',
+      options: [
+        { label: 'S1 - High', value: 'S1' },
+        { label: 'S2 - Medium', value: 'S2' },
+        { label: 'S3 - Low', value: 'S3' },
+      ],
+      admin: {
+        position: 'sidebar',
+      },
+    },
+    {
+      name: 'status',
+      type: 'select',
+      required: true,
+      defaultValue: 'queued',
+      index: true,
+      options: [
+        { label: 'Queued', value: 'queued' },
+        { label: 'Generating', value: 'generating' },
+        { label: 'Draft', value: 'draft' },
+        { label: 'Review', value: 'review' },
+        { label: 'Published', value: 'published' },
+        { label: 'Error', value: 'error' },
+      ],
+      admin: {
+        position: 'sidebar',
+      },
+    },
+    // Competitor research
+    {
+      name: 'competitorUrls',
+      type: 'array',
+      admin: {
+        description: 'URLs of competitor articles to analyze',
+      },
+      fields: [
+        {
+          name: 'url',
+          type: 'text',
+          required: true,
+        },
+      ],
+    },
+    // Article outline
+    {
+      name: 'outline',
+      type: 'array',
+      admin: {
+        description: 'Article outline (headings and structure)',
+      },
+      fields: [
+        {
+          name: 'order',
+          type: 'number',
+          required: true,
+        },
+        {
+          name: 'anchorId',
+          type: 'text',
+          admin: {
+            description: 'HTML anchor ID for this section',
+          },
+        },
+        {
+          name: 'heading',
+          type: 'text',
+          required: true,
+        },
+        {
+          name: 'summary',
+          type: 'textarea',
+          admin: {
+            description: 'Brief description of section content',
+          },
+        },
+        {
+          name: 'linksTo',
+          type: 'text',
+          admin: {
+            description: 'Slug of article this section should link to',
+          },
+        },
+      ],
+    },
+    // Generated content link
+    {
+      name: 'generatedPost',
+      type: 'relationship',
+      relationTo: 'posts',
+      admin: {
+        position: 'sidebar',
+        description: 'The generated blog post (set automatically)',
+      },
+    },
+    // Error tracking
+    {
+      name: 'errorMessage',
+      type: 'textarea',
+      admin: {
+        position: 'sidebar',
+        description: 'Error details if generation failed',
+        condition: (data) => data?.status === 'error',
+      },
+    },
+    // Notes
+    {
+      name: 'notes',
+      type: 'textarea',
+      admin: {
+        description: 'Internal notes about this queue item',
+      },
+    },
+  ],
+}
