@@ -72,6 +72,7 @@ export interface Config {
     posts: Post;
     categories: Category;
     tags: Tag;
+    'content-queue': ContentQueue;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -84,6 +85,7 @@ export interface Config {
     posts: PostsSelect<false> | PostsSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     tags: TagsSelect<false> | TagsSelect<true>;
+    'content-queue': ContentQueueSelect<false> | ContentQueueSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -208,7 +210,7 @@ export interface Post {
    * Brief summary for SEO and post previews (max 300 chars)
    */
   excerpt: string;
-  featuredImage: number | Media;
+  featuredImage?: (number | null) | Media;
   content: {
     root: {
       type: string;
@@ -239,6 +241,32 @@ export interface Post {
      */
     metaDescription?: string | null;
   };
+  /**
+   * Airport IATA code (e.g., JFK, LGA)
+   */
+  airportCode?: string | null;
+  /**
+   * Topic cluster tier for SEO content
+   */
+  articleType?: ('hub' | 'sub-pillar' | 'spoke') | null;
+  /**
+   * Parent article slug (for sub-pillars and spokes)
+   */
+  parentSlug?: string | null;
+  /**
+   * Hub article slug for the airport cluster
+   */
+  hubSlug?: string | null;
+  /**
+   * FAQ items for accordion display and schema markup
+   */
+  faqItems?:
+    | {
+        question: string;
+        answer: string;
+        id?: string | null;
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -262,6 +290,100 @@ export interface Tag {
   id: number;
   name: string;
   slug: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "content-queue".
+ */
+export interface ContentQueue {
+  id: number;
+  /**
+   * Target SEO keyword (e.g., "jfk airport parking rates")
+   */
+  keyword: string;
+  /**
+   * Suggested article title
+   */
+  suggestedTitle: string;
+  /**
+   * Airport IATA code (e.g., JFK, LGA)
+   */
+  airportCode: string;
+  /**
+   * URL slug for the generated article
+   */
+  slug: string;
+  /**
+   * Topic cluster tier
+   */
+  articleType: 'hub' | 'sub-pillar' | 'spoke';
+  /**
+   * Parent article slug (for sub-pillars and spokes)
+   */
+  parentSlug?: string | null;
+  /**
+   * Hub article slug for the airport cluster
+   */
+  hubSlug?: string | null;
+  /**
+   * Monthly search volume estimate
+   */
+  searchVolume?: number | null;
+  /**
+   * SEO difficulty score (0-100)
+   */
+  seoDifficulty?: number | null;
+  /**
+   * Target word count for the article
+   */
+  targetWords?: number | null;
+  priority: 'S1' | 'S2' | 'S3';
+  status: 'queued' | 'generating' | 'draft' | 'review' | 'published' | 'error';
+  /**
+   * URLs of competitor articles to analyze
+   */
+  competitorUrls?:
+    | {
+        url: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Article outline (headings and structure)
+   */
+  outline?:
+    | {
+        order: number;
+        /**
+         * HTML anchor ID for this section
+         */
+        anchorId?: string | null;
+        heading: string;
+        /**
+         * Brief description of section content
+         */
+        summary?: string | null;
+        /**
+         * Slug of article this section should link to
+         */
+        linksTo?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * The generated blog post (set automatically)
+   */
+  generatedPost?: (number | null) | Post;
+  /**
+   * Error details if generation failed
+   */
+  errorMessage?: string | null;
+  /**
+   * Internal notes about this queue item
+   */
+  notes?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -308,6 +430,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'tags';
         value: number | Tag;
+      } | null)
+    | ({
+        relationTo: 'content-queue';
+        value: number | ContentQueue;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -451,6 +577,17 @@ export interface PostsSelect<T extends boolean = true> {
         metaTitle?: T;
         metaDescription?: T;
       };
+  airportCode?: T;
+  articleType?: T;
+  parentSlug?: T;
+  hubSlug?: T;
+  faqItems?:
+    | T
+    | {
+        question?: T;
+        answer?: T;
+        id?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -472,6 +609,45 @@ export interface CategoriesSelect<T extends boolean = true> {
 export interface TagsSelect<T extends boolean = true> {
   name?: T;
   slug?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "content-queue_select".
+ */
+export interface ContentQueueSelect<T extends boolean = true> {
+  keyword?: T;
+  suggestedTitle?: T;
+  airportCode?: T;
+  slug?: T;
+  articleType?: T;
+  parentSlug?: T;
+  hubSlug?: T;
+  searchVolume?: T;
+  seoDifficulty?: T;
+  targetWords?: T;
+  priority?: T;
+  status?: T;
+  competitorUrls?:
+    | T
+    | {
+        url?: T;
+        id?: T;
+      };
+  outline?:
+    | T
+    | {
+        order?: T;
+        anchorId?: T;
+        heading?: T;
+        summary?: T;
+        linksTo?: T;
+        id?: T;
+      };
+  generatedPost?: T;
+  errorMessage?: T;
+  notes?: T;
   updatedAt?: T;
   createdAt?: T;
 }
