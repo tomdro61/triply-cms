@@ -242,6 +242,10 @@ export interface Post {
     metaDescription?: string | null;
   };
   /**
+   * SEO score (0-100) — run blog-engine score command to update
+   */
+  seoScore?: number | null;
+  /**
    * Airport IATA code (e.g., JFK, LGA)
    */
   airportCode?: string | null;
@@ -577,6 +581,7 @@ export interface PostsSelect<T extends boolean = true> {
         metaTitle?: T;
         metaDescription?: T;
       };
+  seoScore?: T;
   airportCode?: T;
   articleType?: T;
   parentSlug?: T;

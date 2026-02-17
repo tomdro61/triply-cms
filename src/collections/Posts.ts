@@ -4,7 +4,7 @@ export const Posts: CollectionConfig = {
   slug: 'posts',
   admin: {
     useAsTitle: 'title',
-    defaultColumns: ['title', 'status', 'category', 'publishedAt'],
+    defaultColumns: ['title', 'status', 'category', 'seoScore', 'publishedAt'],
   },
   access: {
     read: () => true,
@@ -133,6 +133,18 @@ export const Posts: CollectionConfig = {
           },
         },
       ],
+    },
+    // SEO scoring
+    {
+      name: 'seoScore',
+      type: 'number',
+      min: 0,
+      max: 100,
+      admin: {
+        position: 'sidebar',
+        description: 'SEO score (0-100) — run blog-engine score command to update',
+        readOnly: true,
+      },
     },
     // Blog engine fields
     {
