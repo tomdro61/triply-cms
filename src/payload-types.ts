@@ -246,6 +246,18 @@ export interface Post {
    */
   seoScore?: number | null;
   /**
+   * Full SEO scoring breakdown — updated by the blog engine score command
+   */
+  seoScoreDetails?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  /**
    * Airport IATA code (e.g., JFK, LGA)
    */
   airportCode?: string | null;
@@ -582,6 +594,7 @@ export interface PostsSelect<T extends boolean = true> {
         metaDescription?: T;
       };
   seoScore?: T;
+  seoScoreDetails?: T;
   airportCode?: T;
   articleType?: T;
   parentSlug?: T;
