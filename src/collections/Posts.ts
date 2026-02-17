@@ -146,6 +146,14 @@ export const Posts: CollectionConfig = {
         readOnly: true,
       },
     },
+    {
+      name: 'seoScoreDetails',
+      type: 'json',
+      admin: {
+        description: 'Full SEO scoring breakdown — updated by the blog engine score command',
+        readOnly: true,
+      },
+    },
     // Blog engine fields
     {
       name: 'airportCode',
