@@ -63,6 +63,22 @@ export const ContentQueue: CollectionConfig = {
       },
     },
     {
+      name: 'articleStyle',
+      type: 'select',
+      defaultValue: 'standard',
+      options: [
+        { label: 'Standard', value: 'standard' },
+        { label: 'Narrative', value: 'narrative' },
+        { label: 'Listicle', value: 'listicle' },
+        { label: 'Data-Heavy', value: 'data-heavy' },
+        { label: 'Comparison', value: 'comparison' },
+      ],
+      admin: {
+        position: 'sidebar',
+        description: 'Controls article opening structure and tone variation',
+      },
+    },
+    {
       name: 'parentSlug',
       type: 'text',
       admin: {
@@ -132,6 +148,23 @@ export const ContentQueue: CollectionConfig = {
       ],
       admin: {
         position: 'sidebar',
+      },
+    },
+    // Batching
+    {
+      name: 'batch',
+      type: 'text',
+      admin: {
+        position: 'sidebar',
+        description: 'Batch group name (e.g., "week-1", "jfk-launch")',
+      },
+    },
+    {
+      name: 'scheduledPublishDate',
+      type: 'date',
+      admin: {
+        position: 'sidebar',
+        description: 'Scheduled publish date for batch publishing',
       },
     },
     // Competitor research
