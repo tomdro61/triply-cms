@@ -336,6 +336,10 @@ export interface ContentQueue {
    */
   articleType: 'hub' | 'sub-pillar' | 'spoke';
   /**
+   * Controls article opening structure and tone variation
+   */
+  articleStyle?: ('standard' | 'narrative' | 'listicle' | 'data-heavy' | 'comparison') | null;
+  /**
    * Parent article slug (for sub-pillars and spokes)
    */
   parentSlug?: string | null;
@@ -357,6 +361,14 @@ export interface ContentQueue {
   targetWords?: number | null;
   priority: 'S1' | 'S2' | 'S3';
   status: 'queued' | 'generating' | 'draft' | 'review' | 'published' | 'error';
+  /**
+   * Batch group name (e.g., "week-1", "jfk-launch")
+   */
+  batch?: string | null;
+  /**
+   * Scheduled publish date for batch publishing
+   */
+  scheduledPublishDate?: string | null;
   /**
    * URLs of competitor articles to analyze
    */
@@ -640,6 +652,7 @@ export interface ContentQueueSelect<T extends boolean = true> {
   airportCode?: T;
   slug?: T;
   articleType?: T;
+  articleStyle?: T;
   parentSlug?: T;
   hubSlug?: T;
   searchVolume?: T;
@@ -647,6 +660,8 @@ export interface ContentQueueSelect<T extends boolean = true> {
   targetWords?: T;
   priority?: T;
   status?: T;
+  batch?: T;
+  scheduledPublishDate?: T;
   competitorUrls?:
     | T
     | {
