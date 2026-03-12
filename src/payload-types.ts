@@ -316,13 +316,9 @@ export interface Tag {
 export interface ContentQueue {
   id: number;
   /**
-   * Target SEO keyword (e.g., "jfk airport parking rates")
+   * Focus keyword — drives the URL slug, AI-generated title, and all content. This is the exact search query we want to rank for.
    */
   keyword: string;
-  /**
-   * Suggested article title
-   */
-  suggestedTitle: string;
   /**
    * Airport IATA code (e.g., JFK, LGA)
    */
@@ -648,7 +644,6 @@ export interface TagsSelect<T extends boolean = true> {
  */
 export interface ContentQueueSelect<T extends boolean = true> {
   keyword?: T;
-  suggestedTitle?: T;
   airportCode?: T;
   slug?: T;
   articleType?: T;

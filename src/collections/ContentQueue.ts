@@ -3,8 +3,8 @@ import { CollectionConfig } from 'payload'
 export const ContentQueue: CollectionConfig = {
   slug: 'content-queue',
   admin: {
-    useAsTitle: 'suggestedTitle',
-    defaultColumns: ['suggestedTitle', 'airportCode', 'articleType', 'priority', 'status'],
+    useAsTitle: 'keyword',
+    defaultColumns: ['keyword', 'airportCode', 'articleType', 'priority', 'status'],
     group: 'Blog Engine',
   },
   access: {
@@ -19,15 +19,7 @@ export const ContentQueue: CollectionConfig = {
       type: 'text',
       required: true,
       admin: {
-        description: 'Target SEO keyword (e.g., "jfk airport parking rates")',
-      },
-    },
-    {
-      name: 'suggestedTitle',
-      type: 'text',
-      required: true,
-      admin: {
-        description: 'Suggested article title',
+        description: 'Focus keyword — drives the URL slug, AI-generated title, and all content. This is the exact search query we want to rank for.',
       },
     },
     {
