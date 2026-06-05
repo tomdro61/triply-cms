@@ -113,6 +113,18 @@ export const Posts: CollectionConfig = {
       },
     },
     {
+      name: 'contentUpdatedAt',
+      type: 'date',
+      admin: {
+        position: 'sidebar',
+        date: {
+          pickerAppearance: 'dayAndTime',
+        },
+        description:
+          'Set ONLY when article content is genuinely refreshed (blog engine regeneration or a real editorial update). Drives the visible "Updated" date, JSON-LD dateModified, and sitemap lastmod on the site. Leave blank for SEO scoring, link passes, or other non-content saves — unlike updatedAt, this must not bump automatically. Note: the site only shows the badge when this is >24h after publishedAt, so a same-day stamp will not display.',
+      },
+    },
+    {
       name: 'seo',
       type: 'group',
       fields: [

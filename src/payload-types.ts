@@ -231,6 +231,10 @@ export interface Post {
   author: number | User;
   status: 'draft' | 'published';
   publishedAt?: string | null;
+  /**
+   * Set ONLY when article content is genuinely refreshed (blog engine regeneration or a real editorial update). Drives the visible "Updated" date, JSON-LD dateModified, and sitemap lastmod on the site. Leave blank for SEO scoring, link passes, or other non-content saves — unlike updatedAt, this must not bump automatically. Note: the site only shows the badge when this is >24h after publishedAt, so a same-day stamp will not display.
+   */
+  contentUpdatedAt?: string | null;
   seo?: {
     /**
      * Override title for search engines (max 60 chars)
@@ -595,6 +599,7 @@ export interface PostsSelect<T extends boolean = true> {
   author?: T;
   status?: T;
   publishedAt?: T;
+  contentUpdatedAt?: T;
   seo?:
     | T
     | {
