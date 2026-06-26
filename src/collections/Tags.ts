@@ -1,4 +1,5 @@
 import { CollectionConfig } from 'payload'
+import { authenticated } from '../access/authenticated'
 
 export const Tags: CollectionConfig = {
   slug: 'tags',
@@ -6,10 +7,12 @@ export const Tags: CollectionConfig = {
     useAsTitle: 'name',
   },
   access: {
+    // Read kept public (tiny 744KB table, negligible egress; avoids breaking
+    // any public tag listing). Writes locked to close the create/delete hole.
     read: () => true,
-    create: () => true,
-    update: () => true,
-    delete: () => true,
+    create: authenticated,
+    update: authenticated,
+    delete: authenticated,
   },
   fields: [
     {
