@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload'
+import { isAdmin, isAdminField, isAdminOrSelf } from '../access'
 
 export const Users: CollectionConfig = {
   slug: 'users',
@@ -8,11 +9,15 @@ export const Users: CollectionConfig = {
   admin: {
     useAsTitle: 'email',
   },
+  // Locked October 2, 2026 (Phase 0a). Previously every action was `() => true`:
+  // anyone could create an admin, change a password, or list users — and
+  // Payload's apiKey field decrypts on read, so API keys were readable too.
+  // Admins manage users; a user may read and edit their own record only.
   access: {
-    read: () => true,
-    create: () => true,
-    update: () => true,
-    delete: () => true,
+    read: isAdminOrSelf,
+    create: isAdmin,
+    update: isAdminOrSelf,
+    delete: isAdmin,
   },
   fields: [
     {
@@ -29,6 +34,9 @@ export const Users: CollectionConfig = {
       ],
       defaultValue: 'editor',
       required: true,
+      // Only an admin may change roles — otherwise an editor editing their own
+      // record could promote themselves.
+      access: { update: isAdminField },
     },
   ],
 }

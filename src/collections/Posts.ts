@@ -1,4 +1,5 @@
 import { CollectionConfig } from 'payload'
+import { anyone, authed } from '../access'
 
 export const Posts: CollectionConfig = {
   slug: 'posts',
@@ -7,10 +8,29 @@ export const Posts: CollectionConfig = {
     defaultColumns: ['title', 'status', 'category', 'seoScore', 'publishedAt'],
   },
   access: {
-    read: () => true,
-    create: () => true,
-    update: () => true,
-    delete: () => true,
+    read: anyone,
+    create: authed,
+    update: authed,
+    delete: authed,
+  },
+  hooks: {
+    afterRead: [
+      // A populated `author` is a full `users` record, and Payload's built-in
+      // apiKey field decrypts on read with no field-level access. Posts are
+      // publicly readable, so until October 2, 2026 anyone could collect every
+      // user's API key via `GET /api/posts?depth=1`. Strip the credential
+      // fields from a populated author on EVERY read — logged-in, API-key or
+      // anonymous — so no response (and no CDN cache of one) ever carries them.
+      ({ doc }) => {
+        const author = doc?.author
+        if (author && typeof author === 'object') {
+          delete author.apiKey
+          delete author.enableAPIKey
+          delete author.apiKeyIndex
+        }
+        return doc
+      },
+    ],
   },
   fields: [
     {
