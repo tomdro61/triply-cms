@@ -1,4 +1,5 @@
 import { CollectionConfig } from 'payload'
+import { anyone, authed } from '../access'
 
 export const Tags: CollectionConfig = {
   slug: 'tags',
@@ -6,10 +7,10 @@ export const Tags: CollectionConfig = {
     useAsTitle: 'name',
   },
   access: {
-    read: () => true,
-    create: () => true,
-    update: () => true,
-    delete: () => true,
+    read: anyone,
+    create: authed,
+    update: authed,
+    delete: authed,
   },
   fields: [
     {
