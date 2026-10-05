@@ -56,8 +56,11 @@ const integerOrEmpty = (label: string) => (value: unknown): true | string =>
     ? true
     : `${label} must be a whole number`
 
+// Floating point: 9.95 * 100 is 994.9999999999999, so compare with a tolerance.
 const moneyOrEmpty = (label: string) => (value: unknown): true | string =>
-  value == null || value === '' || (typeof value === 'number' && Math.round(value * 100) === value * 100)
+  value == null ||
+  value === '' ||
+  (typeof value === 'number' && Math.abs(value * 100 - Math.round(value * 100)) < 1e-6)
     ? true
     : `${label} must have at most 2 decimal places`
 
