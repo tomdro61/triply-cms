@@ -73,6 +73,8 @@ export interface Config {
     categories: Category;
     tags: Tag;
     'content-queue': ContentQueue;
+    lots: Lot;
+    'lot-amenities': LotAmenity;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -86,6 +88,8 @@ export interface Config {
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     tags: TagsSelect<false> | TagsSelect<true>;
     'content-queue': ContentQueueSelect<false> | ContentQueueSelect<true>;
+    lots: LotsSelect<false> | LotsSelect<true>;
+    'lot-amenities': LotAmenitiesSelect<false> | LotAmenitiesSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -416,6 +420,209 @@ export interface ContentQueue {
   createdAt: string;
 }
 /**
+ * Lots that sell through Triply directly (no Reservations Lab). Admin-only to edit. A lot is bookable only when status = published, isActive is on, and its visibility matches the environment.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lots".
+ */
+export interface Lot {
+  id: number;
+  name: string;
+  /**
+   * URL path segment. Generated from the name if left blank. Lowercase letters, digits and hyphens; cannot be all digits or start with "reslab-"/"direct-" (a name starting with "Direct …" needs a hand-written slug).
+   */
+  slug: string;
+  /**
+   * IATA code the lot serves, UPPERCASE, e.g. LGA. Must match an airport the site lists.
+   */
+  airportCode: string;
+  /**
+   * Only if this same lot ALSO exists on Reservations Lab: its ResLab location id. The ResLab listing is then hidden so the lot is not shown twice.
+   */
+  reslabLocationId?: number | null;
+  /**
+   * Short blurb for search results (max 250 chars)
+   */
+  descriptionShort?: string | null;
+  featuredImage?: (number | null) | Media;
+  /**
+   * Additional photos shown on the lot page. (A media item used here cannot be deleted while referenced.)
+   */
+  gallery?:
+    | {
+        image: number | Media;
+        id?: string | null;
+      }[]
+    | null;
+  content?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  amenities?: (number | LotAmenity)[] | null;
+  /**
+   * Approximate shuttle/walk time to the terminal, in minutes
+   */
+  distanceToTerminalMinutes?: number | null;
+  /**
+   * Shuttle hours and frequency as shown to the customer on the lot page and in the confirmation email (e.g. "Runs every 15 min, 4 AM – 1 AM"). Leave blank if there is no shuttle.
+   */
+  shuttleDetails?: string | null;
+  /**
+   * Shuttle/lot contact phone shown in the confirmation email.
+   */
+  shuttlePhone?: string | null;
+  /**
+   * Required: the confirmation email and Park Guard enrolment both need a full address.
+   */
+  address: {
+    street: string;
+    city: string;
+    /**
+     * 2-letter code, UPPERCASE (e.g. NY)
+     */
+    state: string;
+    zip: string;
+  };
+  /**
+   * Required: map pin, distance to the airport, and airport attribution.
+   */
+  coordinates: {
+    lat: number;
+    lng: number;
+  };
+  faqs?:
+    | {
+        question: string;
+        answer: {
+          root: {
+            type: string;
+            children: {
+              type: any;
+              version: number;
+              [k: string]: unknown;
+            }[];
+            direction: ('ltr' | 'rtl') | null;
+            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+            indent: number;
+            version: number;
+          };
+          [k: string]: unknown;
+        };
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Lot-specific sections for the confirmation email. Plain text per section: lines starting with "- " render as bullets. Empty sections are omitted.
+   */
+  bookingInstructions?: {
+    /**
+     * "Before Arrival" — forms or reminders.
+     */
+    beforeArrival?: string | null;
+    /**
+     * "When You Arrive" — check-in / key-drop procedure.
+     */
+    whenYouArrive?: string | null;
+    /**
+     * "Important Notes" — restrictions (vehicle size, oversize fees). Shown highlighted.
+     */
+    importantNotes?: string | null;
+    /**
+     * "When You Return" — pickup procedure.
+     */
+    whenYouReturn?: string | null;
+    /**
+     * "Getting to and from the Airport" — shuttle details or alternatives.
+     */
+    gettingToAirport?: string | null;
+  };
+  /**
+   * Must be on for the lot to appear in search or be bookable.
+   */
+  isActive?: boolean | null;
+  /**
+   * "staging_only" = visible on staging/preview/local only (test lots; the CMS is shared by every environment). "production" = visible everywhere. Staging-only lots may only notify @triplypro.com addresses.
+   */
+  visibility: string;
+  /**
+   * Minimum billed days per booking (whole number).
+   */
+  minStayDays?: number | null;
+  /**
+   * Earliest drop-off accepted, in hours from now. Gives the lot time to see the booking email (default 2).
+   */
+  minLeadHours?: number | null;
+  /**
+   * Price per billed day in USD (2 decimals), before tax and before the Triply service fee. Billing is in 24-hour periods from drop-off to pickup.
+   */
+  baseDailyRate: number;
+  /**
+   * Parking tax applied to the parking subtotal, as a percentage (e.g. 18.375). Required — enter 0 only if confirmed with the accountant.
+   */
+  taxRatePercent: number;
+  /**
+   * "triply" = Triply collects the tax online and remits it. "lot" = the tax is passed through to the lot in its payout. Required; no default on purpose.
+   */
+  taxCollectedBy: string;
+  /**
+   * Share of the parking subtotal paid out to the lot, as a percentage (e.g. 80).
+   */
+  partnerSharePercent: number;
+  /**
+   * Where the lot receives each booking and cancellation notice (and the daily manifest). At least one. For a staging_only lot these must all be @triplypro.com.
+   */
+  notificationEmails: {
+    email: string;
+    id?: string | null;
+  }[];
+  /**
+   * Draft lots are never shown or bookable, regardless of isActive.
+   */
+  status: 'draft' | 'published';
+  /**
+   * Record only — when the lot first went live. Not used by the site.
+   */
+  publishedAt?: string | null;
+  seo?: {
+    metaTitle?: string | null;
+    metaDescription?: string | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lot-amenities".
+ */
+export interface LotAmenity {
+  id: number;
+  /**
+   * Display name (e.g. "EV Charging", "Covered Parking", "Shuttle to Terminal")
+   */
+  name: string;
+  /**
+   * Icon token used by the site icon set (e.g. "plug", "roof")
+   */
+  icon?: string | null;
+  /**
+   * Short tooltip description (optional)
+   */
+  description?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
@@ -462,6 +669,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'content-queue';
         value: number | ContentQueue;
+      } | null)
+    | ({
+        relationTo: 'lots';
+        value: number | Lot;
+      } | null)
+    | ({
+        relationTo: 'lot-amenities';
+        value: number | LotAmenity;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -681,6 +896,94 @@ export interface ContentQueueSelect<T extends boolean = true> {
   generatedPost?: T;
   errorMessage?: T;
   notes?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lots_select".
+ */
+export interface LotsSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  airportCode?: T;
+  reslabLocationId?: T;
+  descriptionShort?: T;
+  featuredImage?: T;
+  gallery?:
+    | T
+    | {
+        image?: T;
+        id?: T;
+      };
+  content?: T;
+  amenities?: T;
+  distanceToTerminalMinutes?: T;
+  shuttleDetails?: T;
+  shuttlePhone?: T;
+  address?:
+    | T
+    | {
+        street?: T;
+        city?: T;
+        state?: T;
+        zip?: T;
+      };
+  coordinates?:
+    | T
+    | {
+        lat?: T;
+        lng?: T;
+      };
+  faqs?:
+    | T
+    | {
+        question?: T;
+        answer?: T;
+        id?: T;
+      };
+  bookingInstructions?:
+    | T
+    | {
+        beforeArrival?: T;
+        whenYouArrive?: T;
+        importantNotes?: T;
+        whenYouReturn?: T;
+        gettingToAirport?: T;
+      };
+  isActive?: T;
+  visibility?: T;
+  minStayDays?: T;
+  minLeadHours?: T;
+  baseDailyRate?: T;
+  taxRatePercent?: T;
+  taxCollectedBy?: T;
+  partnerSharePercent?: T;
+  notificationEmails?:
+    | T
+    | {
+        email?: T;
+        id?: T;
+      };
+  status?: T;
+  publishedAt?: T;
+  seo?:
+    | T
+    | {
+        metaTitle?: T;
+        metaDescription?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lot-amenities_select".
+ */
+export interface LotAmenitiesSelect<T extends boolean = true> {
+  name?: T;
+  icon?: T;
+  description?: T;
   updatedAt?: T;
   createdAt?: T;
 }

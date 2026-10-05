@@ -12,6 +12,8 @@ import { Posts } from './collections/Posts'
 import { Categories } from './collections/Categories'
 import { Tags } from './collections/Tags'
 import { ContentQueue } from './collections/ContentQueue'
+import { Lots } from './collections/Lots'
+import { LotAmenities } from './collections/LotAmenities'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -43,7 +45,7 @@ export default buildConfig({
     'http://localhost:3001',
   ],
 
-  collections: [Users, Media, Posts, Categories, Tags, ContentQueue],
+  collections: [Users, Media, Posts, Categories, Tags, ContentQueue, Lots, LotAmenities],
   editor: lexicalEditor({
     features: ({ defaultFeatures }) => [...defaultFeatures, EXPERIMENTAL_TableFeature()],
   }),
