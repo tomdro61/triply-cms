@@ -568,6 +568,26 @@ export interface Lot {
    */
   baseDailyRate: number;
   /**
+   * Oversized-vehicle surcharges, PAID AT THE LOT (never charged online). The customer picks one when they reserve; "No oversized vehicle" is always offered and is not a row here. Tax on the surcharge is also paid at the lot, at this lot's tax rate. Leave empty if the lot has no surcharges. A bad row takes the lot offline on the site, so every row is checked on save.
+   */
+  vehicleSurcharges?:
+    | {
+        /**
+         * Stable id stored on bookings, e.g. small_suv. Lowercase letters, digits and underscores; unique within the lot; never "none". Do not change it once bookings exist.
+         */
+        code: string;
+        /**
+         * What the customer sees, e.g. "Large SUV / truck".
+         */
+        label: string;
+        /**
+         * USD per billed day, before tax (2 decimals). Billed on the same days as the parking.
+         */
+        dailyRate: number;
+        id?: string | null;
+      }[]
+    | null;
+  /**
    * Parking tax applied to the parking subtotal, as a percentage (e.g. 18.375). Required — enter 0 only if confirmed with the accountant.
    */
   taxRatePercent: number;
@@ -956,6 +976,14 @@ export interface LotsSelect<T extends boolean = true> {
   minStayDays?: T;
   minLeadHours?: T;
   baseDailyRate?: T;
+  vehicleSurcharges?:
+    | T
+    | {
+        code?: T;
+        label?: T;
+        dailyRate?: T;
+        id?: T;
+      };
   taxRatePercent?: T;
   taxCollectedBy?: T;
   partnerSharePercent?: T;

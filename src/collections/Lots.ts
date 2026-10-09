@@ -64,6 +64,38 @@ const moneyOrEmpty = (label: string) => (value: unknown): true | string =>
     ? true
     : `${label} must have at most 2 decimal places`
 
+// A custom `validate` REPLACES Payload's built-in one, so `required` / `min` on a
+// field with a validator are not enforced — this checks them itself.
+const positiveMoney = (label: string, max: number) => (value: unknown): true | string => {
+  if (typeof value !== 'number' || !(value > 0)) return `${label} is required and must be above 0`
+  if (value > max) return `${label} must be at most ${max}`
+  return Math.abs(value * 100 - Math.round(value * 100)) < 1e-6 ? true : `${label} must have at most 2 decimal places`
+}
+
+// The main app parses these rows strictly (a bad row makes the whole lot
+// unreadable, not "no surcharges"), so every rule it enforces is checked here
+// on save. Keep in step with the app's direct-lots store schema.
+export const MAX_VEHICLE_SURCHARGES = 6
+const MAX_SURCHARGE_DAILY_RATE = 1000
+const VEHICLE_CODE_RE = /^[a-z0-9_]{1,32}$/
+
+const vehicleSurchargesValid = (value: unknown): true | string => {
+  if (value == null) return true
+  if (!Array.isArray(value)) return 'Vehicle surcharges must be a list'
+  if (value.length > MAX_VEHICLE_SURCHARGES) return `At most ${MAX_VEHICLE_SURCHARGES} vehicle surcharges`
+  const seen = new Set<string>()
+  for (const row of value as Array<{ code?: unknown; dailyRate?: unknown }>) {
+    const code = typeof row?.code === 'string' ? row.code : ''
+    if (code === 'none') return '"none" is reserved for "No oversized vehicle"'
+    // An empty code is reported by the code field itself.
+    if (code && seen.has(code)) return `Duplicate vehicle surcharge code: ${code}`
+    seen.add(code)
+    if (typeof row?.dailyRate !== 'number' || !(row.dailyRate > 0) || row.dailyRate > MAX_SURCHARGE_DAILY_RATE)
+      return `Surcharge "${code}" needs a daily rate above 0 and at most ${MAX_SURCHARGE_DAILY_RATE}`
+  }
+  return true
+}
+
 export const Lots: CollectionConfig = {
   slug: 'lots',
   admin: {
@@ -294,11 +326,58 @@ export const Lots: CollectionConfig = {
       type: 'number',
       required: true,
       min: 0.01,
-      validate: moneyOrEmpty('Daily rate'),
+      validate: positiveMoney('Daily rate', 1000),
       admin: {
         description:
           'Price per billed day in USD (2 decimals), before tax and before the Triply service fee. Billing is in 24-hour periods from drop-off to pickup.',
       },
+    },
+    {
+      name: 'vehicleSurcharges',
+      type: 'array',
+      maxRows: MAX_VEHICLE_SURCHARGES,
+      validate: vehicleSurchargesValid,
+      labels: { singular: 'Vehicle surcharge', plural: 'Vehicle surcharges' },
+      admin: {
+        description:
+          'Oversized-vehicle surcharges, PAID AT THE LOT (never charged online). The customer picks one when they reserve; "No oversized vehicle" is always offered and is not a row here. Tax on the surcharge is also paid at the lot, at this lot\'s tax rate. Leave empty if the lot has no surcharges. A bad row takes the lot offline on the site, so every row is checked on save.',
+      },
+      fields: [
+        {
+          name: 'code',
+          type: 'text',
+          required: true,
+          admin: {
+            description:
+              'Stable id stored on bookings, e.g. small_suv. Lowercase letters, digits and underscores; unique within the lot; never "none". Do not change it once bookings exist.',
+          },
+          validate: (value: unknown) =>
+            typeof value === 'string' && VEHICLE_CODE_RE.test(value)
+              ? value === 'none'
+                ? '"none" is reserved for "No oversized vehicle"'
+                : true
+              : 'Use 1–32 lowercase letters, digits or underscores (e.g. small_suv)',
+        },
+        {
+          name: 'label',
+          type: 'text',
+          required: true,
+          maxLength: 40,
+          admin: { description: 'What the customer sees, e.g. "Large SUV / truck".' },
+          validate: (value: unknown) =>
+            typeof value === 'string' && value.trim().length >= 1 && value.trim().length <= 40
+              ? true
+              : 'Label is required (1–40 characters)',
+        },
+        {
+          name: 'dailyRate',
+          type: 'number',
+          required: true,
+          min: 0.01,
+          validate: positiveMoney('Surcharge per day', MAX_SURCHARGE_DAILY_RATE),
+          admin: { description: 'USD per billed day, before tax (2 decimals). Billed on the same days as the parking.' },
+        },
+      ],
     },
     {
       name: 'taxRatePercent',
