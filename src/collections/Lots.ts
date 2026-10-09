@@ -385,6 +385,13 @@ export const Lots: CollectionConfig = {
       required: true,
       min: 0,
       max: 30,
+      // The app stamps this on the payment and stores it as NUMERIC(6,3): a rate
+      // with more decimals would take the lot offline on the site. (A custom
+      // validate replaces Payload's, so required/min/max are checked here too.)
+      validate: (value: unknown): true | string =>
+        typeof value === 'number' && value >= 0 && value <= 30 && /^\d{1,3}(\.\d{1,3})?$/.test(String(value))
+          ? true
+          : 'Tax rate is required: 0–30, up to 3 decimals (e.g. 18.375)',
       access: { read: isAdminField },
       admin: {
         description:
