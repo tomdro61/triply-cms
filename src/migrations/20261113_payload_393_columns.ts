@@ -45,6 +45,8 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
 // admin. API keys are not affected.
 export async function down({ db }: MigrateDownArgs): Promise<void> {
   await db.execute(sql`
+    SET LOCAL lock_timeout = '5s';
+
     ALTER TABLE "payload"."users" DROP COLUMN IF EXISTS "reset_password_requested_at";
     ALTER TABLE "payload"."media" DROP COLUMN IF EXISTS "_objectkey";
   `)
