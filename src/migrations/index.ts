@@ -2,6 +2,7 @@ import * as migration_20260312_remove_suggestedTitle from './20260312_remove_sug
 import * as migration_20260605_add_content_updated_at from './20260605_add_content_updated_at';
 import * as migration_20261005_add_lots from './20261005_add_lots';
 import * as migration_20261009_add_lot_vehicle_surcharges from './20261009_add_lot_vehicle_surcharges';
+import * as migration_20261113_payload_393_columns from './20261113_payload_393_columns';
 
 export const migrations = [
   {
@@ -23,5 +24,10 @@ export const migrations = [
     up: migration_20261009_add_lot_vehicle_surcharges.up,
     down: migration_20261009_add_lot_vehicle_surcharges.down,
     name: '20261009_add_lot_vehicle_surcharges',
+  },
+  {
+    up: migration_20261113_payload_393_columns.up,
+    down: migration_20261113_payload_393_columns.down,
+    name: '20261113_payload_393_columns',
   },
 ];
