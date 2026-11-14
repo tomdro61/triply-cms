@@ -32,9 +32,17 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
   `)
 }
 
-// Roll the code back to Payload 3.74 FIRST: 3.90+ selects both columns on
-// every users and media read, so dropping them under the deployed code breaks
-// the admin, the blog engine's API key and every post with an image.
+// Normally never run: leave the columns in place on a rollback (3.74 ignores
+// them). If they must go, roll the code back to Payload 3.74 FIRST: 3.90+
+// selects both columns on every users and media read, so dropping them under
+// the deployed code breaks the admin, the blog engine's API key and every
+// post with an image.
+//
+// A code rollback does NOT undo passwords: a successful login on 3.90+
+// rewrites that account's hash in a format 3.74 cannot verify (this happens on
+// a preview too, since previews share this database). After a rollback, an
+// admin who never logged in on 3.90+ must reset the others' passwords in the
+// admin. API keys are not affected.
 export async function down({ db }: MigrateDownArgs): Promise<void> {
   await db.execute(sql`
     ALTER TABLE "payload"."users" DROP COLUMN IF EXISTS "reset_password_requested_at";
