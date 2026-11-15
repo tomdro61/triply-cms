@@ -26,6 +26,10 @@ export default buildConfig({
     },
     meta: {
       titleSuffix: '- Triply CMS',
+      // The admin's link-preview image route (/api/og) is public and renders
+      // images on request. Nothing shares admin links, so it is turned off:
+      // the route answers 400 instead of running the image renderer.
+      defaultOGImageType: 'off',
     },
   },
 
