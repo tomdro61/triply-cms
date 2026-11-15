@@ -18,6 +18,10 @@ export const Users: CollectionConfig = {
     create: isAdmin,
     update: isAdminOrSelf,
     delete: isAdmin,
+    // Payload's default lets ANY signed-in user (an editor, or an API key)
+    // clear another account's login lockout, which removes the brute-force
+    // limit on an admin's password (GHSA-jg8r-5jh2-v2xj). Admins only.
+    unlock: isAdmin,
   },
   fields: [
     {
