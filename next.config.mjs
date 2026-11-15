@@ -1,8 +1,13 @@
 import { withPayload } from '@payloadcms/next/withPayload'
+import path from 'path'
+import { fileURLToPath } from 'url'
+
+const dirname = path.dirname(fileURLToPath(import.meta.url))
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Your Next.js config here
+  // Next 16 builds with Turbopack, which ignores this webpack block. It is kept
+  // for `next build --webpack`, the fallback if a Turbopack build misbehaves.
   webpack: (webpackConfig) => {
     webpackConfig.resolve.extensionAlias = {
       '.cjs': ['.cts', '.cjs'],
@@ -11,6 +16,10 @@ const nextConfig = {
     }
 
     return webpackConfig
+  },
+  // Pin the project root so Turbopack never picks a parent folder's lockfile.
+  turbopack: {
+    root: dirname,
   },
   // Block search-engine indexing of cms.triplypro.com. The robots.txt at
   // src/app/robots.ts is the primary signal; this header is defense in
